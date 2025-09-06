@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Manajemen Warung</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIldhcnVuZyBNYW5hZ2VyIiwKICAic2hvcnRfbmFtZSI6ICJXYXJ1bmciLAogICJkZXNjcmlwdGlvbiI6ICJBcGxpa2FzaSBNYW5hamVtZW4gV2FydW5nIE9mZmxpbmUiLAogICJzdGFydF91cmwiOiAiLyIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzZmNzNmZiIsCiAgInRoZW1lX2NvbG9yIjogIiM2ZjczZmYiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSGRwWkhSb1BTSXhNakFpSUdobGFXZG9kRDBpTVRJd0lqNDhjbVZqZENCM2FXUjBhRDBpTVRJd0lpQm9aV2xuYUhROUlqRXlNQ0lpSUdacGJHdzlJaU0yWmpjelpqWWlMejQ4ZEdWNGRDQjRQU0kyTUNJZ2VUMGlOekFpSUdacGJHdzlJaU0zWmpkbU5tWWlJR1p2Ym5RdGMybDZaVDBpTkRBaUlIUmxlSFF0WVc1amFHOXlQU0p0YVdSa2JHVWlQaUJYUEM5MFpYaDBQZz09IiwKICAgICAgInNpemVzIjogIjEyMHgxMjAiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSGRwWkhSb1BTSXlOVFlpSUdobGFXZG9kRDBpTWpVMklqNDhjbVZqZENCM2FXUjBhRDBpTWpVMklpQm9aV2xuYUhROUlqSTFOaUlnWm1sc2JEMGlJelptTnpObU5pSXZQangwWlhoMElIZzlJakV5T0NJZ2VUMGlNVFE0SWlCbWFXeHNQU0lqTjJZM1pqWm1JaUJtYjI1MExYTnBlbVU5SWpnd0lpQjBaWGgwTFdGdVkyaHZjajBpYldsa1pHeGxJajRnVnp3dmRHVjRkRDQ9IiwKICAgICAgInNpemVzIjogIjI1NngyNTYiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfQogIF0KfQ==">
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                const swCode = `
+                    const CACHE_NAME = 'warung-manager-v1';
+                    const urlsToCache = [
+                        '/',
+                        'https://cdn.tailwindcss.com',
+                        'https://cdn.jsdelivr.net/npm/chart.js'
+                    ];
+
+                    self.addEventListener('install', function(event) {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME)
+                                .then(function(cache) {
+                                    return cache.addAll(urlsToCache);
+                                })
+                        );
+                    });
+
+                    self.addEventListener('fetch', function(event) {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then(function(response) {
+                                    if (response) {
+                                        return response;
+                                    }
+                                    return fetch(event.request);
+                                }
+                            )
+                        );
+                    });
+                `;
+                
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                
+                navigator.serviceWorker.register(swUrl)
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(function(err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #f8fafc;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --surface: #ffffff;
+            --surface-elevated: #f8fafc;
+        }
+
+        .dark {
+            --primary: #818cf8;
+            --primary-dark: #6366f1;
+            --secondary: #0f172a;
+            --accent: #34d399;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --surface: #1e293b;
+            --surface-elevated: #334155;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--secondary) 0%, #f1f5f9 100%);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            animation: gradientShift 15s ease-in-out infinite;
+        }
+
+        .dark body {
+            background: linear-gradient(135deg, var(--secondary) 0%, #020617 100%);
+            animation: gradientShiftDark 15s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); }
+            25% { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
+            50% { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); }
+            75% { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
+        }
+
+        @keyframes gradientShiftDark {
+            0%, 100% { background: linear-gradient(135deg, #0f172a 0%, #020617 100%); }
+            25% { background: linear-gradient(135deg, #451a03 0%, #78350f 100%); }
+            50% { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); }
+            75% { background: linear-gradient(135deg, #581c87 0%, #6b21a8 100%); }
+        }
+
+        .scrolling-text {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            overflow: hidden;
+            z-index: -1;
+            opacity: 0.03;
+            pointer-events: none;
+            transform: translateY(-50%);
+        }
+
+        .scrolling-content {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            animation: scrollText 30s linear infinite;
+            white-space: nowrap;
+        }
+
+        .scrolling-item {
+            font-size: 48px;
+            font-weight: 900;
+            margin-right: 100px;
+            color: var(--text-primary);
+        }
+
+        @keyframes scrollText {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .scroll-direction-up .scrolling-content {
+            animation-direction: reverse;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-elevated {
+            background: var(--surface-elevated);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 12px -1px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 12px -1px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 12px -1px rgba(239, 68, 68, 0.4);
+        }
+
+        .input-field {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .stats-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .stats-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .menu-item:hover {
+            background: var(--surface-elevated);
+            transform: translateX(4px);
+        }
+
+        .warning-stock {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid var(--warning);
+            border-radius: 8px;
+        }
+
+        .dark .warning-stock {
+            background: linear-gradient(135deg, #451a03 0%, #78350f 100%);
+        }
+
+        .hidden { display: none; }
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Smooth Transitions */
+        * {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Notification Bar */
+        .notification {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            z-index: 1000;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .notification.show {
+            top: 20px;
+            animation: slideInBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        @keyframes slideInBounce {
+            0% { transform: translateX(-50%) translateY(-100px) scale(0.8); opacity: 0; }
+            60% { transform: translateX(-50%) translateY(10px) scale(1.05); opacity: 1; }
+            100% { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+        }
+
+        /* Smooth hover effects */
+        .btn-primary, .btn-success, .btn-danger {
+            transform: translateY(0);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary:hover, .btn-success:hover, .btn-danger:hover {
+            transform: translateY(-2px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .table-row {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .table-row:hover {
+            transform: translateX(4px);
+        }
+
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dark .glass-effect {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(51, 65, 85, 0.3);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .table-row {
+            border-bottom: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .table-row:hover {
+            background: var(--surface-elevated);
+        }
+
+        .icon-wrapper {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stats-card .icon-wrapper {
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .icon-revenue { background: linear-gradient(135deg, #10b981, #059669); }
+        .icon-expense { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .icon-profit-gross { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        .icon-profit-net { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+    </style>
+</head>
+<body class="min-h-screen transition-all duration-500">
+    <!-- PIN Setup Modal -->
+    <div id="pinSetupModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="card glass-effect p-8 max-w-md w-full mx-4 animate-pulse">
+            <div class="text-center mb-6">
+                <div class="icon-wrapper mx-auto bg-gradient-to-br from-indigo-500 to-purple-600 text-white">🔐</div>
+                <h2 class="text-2xl font-bold gradient-text">Buat PIN Keamanan</h2>
+                <p style="color: var(--text-secondary);" class="mt-2">Buat PIN 4 digit untuk mengamankan data aplikasi Anda</p>
+            </div>
+            <div class="space-y-4">
+                <input type="password" id="newPin" placeholder="Masukkan PIN 4 digit" maxlength="4" class="input-field w-full text-center text-2xl tracking-widest">
+                <input type="password" id="confirmPin" placeholder="Konfirmasi PIN" maxlength="4" class="input-field w-full text-center text-2xl tracking-widest">
+                <button onclick="setupPin()" class="btn-primary w-full">Buat PIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PIN Verification Modal -->
+    <div id="pinVerifyModal" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="card glass-effect p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <div class="icon-wrapper mx-auto bg-gradient-to-br from-red-500 to-pink-600 text-white">🔐</div>
+                <h2 class="text-2xl font-bold gradient-text">Masukkan PIN</h2>
+                <p id="pinVerifyMessage" style="color: var(--text-secondary);" class="mt-2">Masukkan PIN untuk menghapus data</p>
+            </div>
+            <div class="space-y-4">
+                <input type="password" id="verifyPin" placeholder="Masukkan PIN" maxlength="4" class="input-field w-full text-center text-2xl tracking-widest">
+                <div class="flex gap-3">
+                    <button onclick="closeVerifyModal()" class="flex-1 px-6 py-3 rounded-xl font-semibold transition-all duration-200 border-2 border-gray-300 hover:border-gray-400" style="color: var(--text-secondary);">Batal</button>
+                    <button onclick="verifyPinAndExecute()" class="btn-danger flex-1">Konfirmasi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Bar -->
+    <div id="notification" class="notification">
+        <span id="notificationText">Data berhasil dihapus!</span>
+    </div>
+
+    <!-- Scrolling Background Text -->
+    <div class="scrolling-text" id="scrollingText">
+        <div class="scrolling-content">
+            <span class="scrolling-item">WARUNG MANAGER</span>
+            <span class="scrolling-item">WARUNG MANAGER</span>
+            <span class="scrolling-item">WARUNG MANAGER</span>
+            <span class="scrolling-item">WARUNG MANAGER</span>
+            <span class="scrolling-item">WARUNG MANAGER</span>
+            <span class="scrolling-item">WARUNG MANAGER</span>
+            <span class="scrolling-item">WARUNG MANAGER</span>
+            <span class="scrolling-item">WARUNG MANAGER</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="glass-effect sticky top-0 z-30 border-b" style="border-color: var(--border);">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center gap-3">
+                    <div class="icon-wrapper bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-2xl">🏪</div>
+                    <h1 class="text-2xl font-bold gradient-text">Warung Manager</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <!-- Online Status Indicator -->
+                    <div id="onlineStatus" class="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium" style="background: var(--surface-elevated); border: 1px solid var(--border);">
+                        <span id="statusIcon" class="text-lg">🟢</span>
+                        <span id="statusText" class="hidden sm:inline">Online</span>
+                    </div>
+                    <button onclick="toggleDarkMode()" class="p-3 rounded-xl transition-all duration-200 hover:scale-105" style="background: var(--surface-elevated); border: 1px solid var(--border);">
+                        <span id="darkModeIcon" class="text-xl">🌙</span>
+                    </button>
+                    <div class="hidden lg:flex items-center gap-2">
+                        <button onclick="showPage('analisis')" id="nav-analisis" class="nav-btn btn-primary flex items-center gap-2 px-4 py-2">
+                            <span class="text-lg">📊</span>
+                            <span class="hidden xl:inline">Analisis</span>
+                        </button>
+                        <button onclick="showPage('produk')" id="nav-produk" class="nav-btn px-4 py-2 rounded-xl font-semibold transition-all duration-200 border-2 flex items-center gap-2" style="border-color: var(--border); color: var(--text-secondary); background: var(--surface);">
+                            <span class="text-lg">📦</span>
+                            <span class="hidden xl:inline">Produk</span>
+                        </button>
+                        <button onclick="showPage('transaksi')" id="nav-transaksi" class="nav-btn px-4 py-2 rounded-xl font-semibold transition-all duration-200 border-2 flex items-center gap-2" style="border-color: var(--border); color: var(--text-secondary); background: var(--surface);">
+                            <span class="text-lg">💰</span>
+                            <span class="hidden xl:inline">Transaksi</span>
+                        </button>
+                        <button onclick="showPage('pengaturan')" id="nav-pengaturan" class="nav-btn px-4 py-2 rounded-xl font-semibold transition-all duration-200 border-2 flex items-center gap-2" style="border-color: var(--border); color: var(--text-secondary); background: var(--surface);">
+                            <span class="text-lg">⚙️</span>
+                            <span class="hidden xl:inline">Pengaturan</span>
+                        </button>
+                    </div>
+                    <div class="lg:hidden">
+                        <button onclick="toggleMenu()" class="btn-primary flex items-center gap-2">
+                            <span class="text-lg">☰</span>
+                            Menu
+                        </button>
+                        <div id="menuDropdown" class="absolute right-0 mt-3 w-56 card-elevated rounded-2xl p-2 hidden z-40">
+                            <button onclick="showPage('analisis')" class="menu-item w-full text-left">
+                                <span class="text-lg">📊</span>
+                                Analisis
+                            </button>
+                            <button onclick="showPage('produk')" class="menu-item w-full text-left">
+                                <span class="text-lg">📦</span>
+                                Produk
+                            </button>
+                            <button onclick="showPage('transaksi')" class="menu-item w-full text-left">
+                                <span class="text-lg">💰</span>
+                                Transaksi
+                            </button>
+                            <button onclick="showPage('pengaturan')" class="menu-item w-full text-left">
+                                <span class="text-lg">⚙️</span>
+                                Pengaturan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+        <!-- Halaman Analisis -->
+        <div id="page-analisis" class="page fade-in">
+            <div class="mb-12">
+                <h2 class="text-4xl font-bold gradient-text mb-3">📊 Analisis Bisnis</h2>
+                <p style="color: var(--text-secondary);" class="text-lg">Pantau performa warung Anda secara real-time</p>
+            </div>
+            
+            <!-- Cards Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                <div class="stats-card">
+                    <div class="icon-wrapper icon-revenue text-white">💰</div>
+                    <h3 class="text-sm font-medium mb-1" style="color: var(--text-secondary);">Total Pemasukan</h3>
+                    <p id="totalPemasukan" class="text-2xl font-bold" style="color: var(--accent);">Rp 0</p>
+                </div>
+                <div class="stats-card">
+                    <div class="icon-wrapper icon-expense text-white">💸</div>
+                    <h3 class="text-sm font-medium mb-1" style="color: var(--text-secondary);">Total Pengeluaran</h3>
+                    <p id="totalPengeluaran" class="text-2xl font-bold" style="color: var(--danger);">Rp 0</p>
+                </div>
+                <div class="stats-card">
+                    <div class="icon-wrapper icon-profit-gross text-white">📈</div>
+                    <h3 class="text-sm font-medium mb-1" style="color: var(--text-secondary);">Laba Kotor</h3>
+                    <p id="labaKotor" class="text-2xl font-bold" style="color: var(--primary);">Rp 0</p>
+                </div>
+                <div class="stats-card">
+                    <div class="icon-wrapper icon-profit-net text-white">💎</div>
+                    <h3 class="text-sm font-medium mb-1" style="color: var(--text-secondary);">Laba Bersih</h3>
+                    <p id="labaBersih" class="text-2xl font-bold text-purple-600">Rp 0</p>
+                </div>
+            </div>
+
+            <!-- Chart Controls -->
+            <div class="card p-8 mb-8">
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div class="flex flex-wrap gap-3 flex-1">
+                        <button onclick="updateChart('daily')" id="btn-daily" class="chart-btn btn-primary">Harian</button>
+                        <button onclick="updateChart('weekly')" id="btn-weekly" class="chart-btn px-6 py-3 rounded-xl font-semibold transition-all duration-200 border-2" style="border-color: var(--border); color: var(--text-secondary); background: var(--surface);">Mingguan</button>
+                        <button onclick="updateChart('monthly')" id="btn-monthly" class="chart-btn px-6 py-3 rounded-xl font-semibold transition-all duration-200 border-2" style="border-color: var(--border); color: var(--text-secondary); background: var(--surface);">Bulanan</button>
+                    </div>
+                    <select id="monthSelect" onchange="updateChart('specific')" class="input-field min-w-48">
+                        <option value="">Pilih Bulan Tertentu</option>
+                    </select>
+                </div>
+                <div class="bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 p-6 rounded-2xl mb-6">
+                    <canvas id="revenueChart" width="400" height="200"></canvas>
+                </div>
+                <div class="flex justify-end">
+                    <button onclick="downloadChart()" class="btn-success flex items-center gap-2">
+                        <span>📥</span>
+                        Download Chart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Rekomendasi Stok -->
+            <div class="card p-8">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="icon-wrapper bg-gradient-to-br from-amber-500 to-orange-600 text-white">🎯</div>
+                    <h3 class="text-2xl font-bold" style="color: var(--text-primary);">Rekomendasi Stok Cerdas</h3>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Stok Ulang -->
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-br from-green-400/20 to-emerald-600/20 rounded-2xl blur-xl"></div>
+                        <div class="relative bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 p-6 rounded-2xl border border-green-200 dark:border-green-700">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-white text-xl animate-pulse">🔥</div>
+                                <div>
+                                    <h4 class="text-xl font-bold text-green-800 dark:text-green-200">Segera Stok Ulang</h4>
+                                    <p class="text-sm text-green-600 dark:text-green-400">Produk dengan penjualan tinggi</p>
+                                </div>
+                            </div>
+                            <div id="rekomendasiStokUlang" class="space-y-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Kurangi Pembelian -->
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-br from-orange-400/20 to-red-600/20 rounded-2xl blur-xl"></div>
+                        <div class="relative bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-900/30 p-6 rounded-2xl border border-orange-200 dark:border-orange-700">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center text-white text-xl animate-bounce">⚠️</div>
+                                <div>
+                                    <h4 class="text-xl font-bold text-orange-800 dark:text-orange-200">Kurangi Pembelian</h4>
+                                    <p class="text-sm text-orange-600 dark:text-orange-400">Produk dengan penjualan rendah</p>
+                                </div>
+                            </div>
+                            <div id="rekomendasiKurangi" class="space-y-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Produk -->
+        <div id="page-produk" class="page hidden">
+            <div class="mb-12">
+                <h2 class="text-4xl font-bold gradient-text mb-3">📦 Manajemen Produk</h2>
+                <p style="color: var(--text-secondary);" class="text-lg">Kelola inventori dan stok produk warung Anda</p>
+            </div>
+            
+            <!-- Form Tambah Produk -->
+            <div class="card p-8 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="icon-wrapper bg-gradient-to-br from-green-500 to-emerald-600 text-white">➕</div>
+                    <h3 class="text-2xl font-bold" style="color: var(--text-primary);">Tambah Produk Baru</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <input type="text" id="namaProduk" placeholder="Nama Produk" class="input-field">
+                    <input type="number" id="hargaBeli" placeholder="Harga Beli" class="input-field">
+                    <input type="number" id="hargaJual" placeholder="Harga Jual" class="input-field">
+                    <input type="number" id="stokAwal" placeholder="Stok Awal" class="input-field">
+                    <button onclick="tambahProduk()" class="btn-primary">Tambah Produk</button>
+                </div>
+            </div>
+
+            <!-- Daftar Produk -->
+            <div class="card p-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="icon-wrapper bg-gradient-to-br from-blue-500 to-indigo-600 text-white">📋</div>
+                    <h3 class="text-2xl font-bold" style="color: var(--text-primary);">Daftar Produk</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border);">
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Nama</th>
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Harga Beli</th>
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Harga Jual</th>
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Keuntungan</th>
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Stok</th>
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="daftarProduk">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Transaksi -->
+        <div id="page-transaksi" class="page hidden">
+            <div class="mb-12">
+                <h2 class="text-4xl font-bold gradient-text mb-3">💰 Transaksi</h2>
+                <p style="color: var(--text-secondary);" class="text-lg">Catat penjualan dan pengeluaran harian warung</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Catat Penjualan -->
+                <div class="card p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="icon-wrapper bg-gradient-to-br from-green-500 to-emerald-600 text-white">📈</div>
+                        <h3 class="text-2xl font-bold" style="color: var(--text-primary);">Catat Penjualan</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <select id="produkPenjualan" class="input-field w-full">
+                            <option value="">Pilih Produk</option>
+                        </select>
+                        <input type="number" id="jumlahPenjualan" placeholder="Jumlah Terjual" class="input-field w-full">
+                        <div id="infoPenjualan" class="text-sm" style="color: var(--text-secondary);"></div>
+                        <button onclick="simpanPenjualan()" class="btn-success w-full">Simpan Penjualan</button>
+                    </div>
+                </div>
+
+                <!-- Catat Pengeluaran -->
+                <div class="card p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="icon-wrapper bg-gradient-to-br from-red-500 to-pink-600 text-white">📉</div>
+                        <h3 class="text-2xl font-bold" style="color: var(--text-primary);">Catat Pengeluaran</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <input type="text" id="keteranganPengeluaran" placeholder="Keterangan (misal: Beli Gas)" class="input-field w-full">
+                        <input type="number" id="jumlahPengeluaran" placeholder="Jumlah Pengeluaran" class="input-field w-full">
+                        <button onclick="simpanPengeluaran()" class="btn-danger w-full">Simpan Pengeluaran</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Riwayat Transaksi -->
+            <div class="card p-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="icon-wrapper bg-gradient-to-br from-purple-500 to-indigo-600 text-white">📜</div>
+                    <h3 class="text-2xl font-bold" style="color: var(--text-primary);">Riwayat Transaksi</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border);">
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Tanggal</th>
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Jam</th>
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Jenis</th>
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Keterangan</th>
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Jumlah</th>
+                                <th class="text-left py-4 px-6 font-semibold" style="color: var(--text-primary);">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="riwayatTransaksi">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Pengaturan -->
+        <div id="page-pengaturan" class="page hidden">
+            <div class="mb-12">
+                <h2 class="text-4xl font-bold gradient-text mb-3">⚙️ Pengaturan</h2>
+                <p style="color: var(--text-secondary);" class="text-lg">Kelola data dan keamanan aplikasi warung</p>
+            </div>
+            
+            <div class="space-y-8">
+                <!-- Export Data -->
+                <div class="card p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="icon-wrapper bg-gradient-to-br from-blue-500 to-indigo-600 text-white">📤</div>
+                        <h3 class="text-2xl font-bold" style="color: var(--text-primary);">Export Data</h3>
+                    </div>
+                    <p style="color: var(--text-secondary);" class="mb-6 text-lg">Download data transaksi dalam format CSV untuk dibuka di Excel atau Google Sheets</p>
+                    <button onclick="exportData()" class="btn-primary">Download CSV</button>
+                </div>
+
+                <!-- Hapus Data -->
+                <div class="card p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="icon-wrapper bg-gradient-to-br from-red-500 to-pink-600 text-white">🗑️</div>
+                        <h3 class="text-2xl font-bold" style="color: var(--text-primary);">Hapus Semua Data</h3>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+                        <p class="text-red-700 dark:text-red-300 font-medium">⚠️ Hati-hati! Tindakan ini akan menghapus semua data dan tidak dapat dikembalikan.</p>
+                    </div>
+                    <button onclick="showDeleteAllDataModal()" class="btn-danger">Hapus Semua Data</button>
+                </div>
+
+                <!-- Offline Status -->
+                <div class="card p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="icon-wrapper bg-gradient-to-br from-purple-500 to-indigo-600 text-white">📱</div>
+                        <h3 class="text-2xl font-bold" style="color: var(--text-primary);">Status Aplikasi</h3>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-700 rounded-xl p-4 mb-6">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">✅</span>
+                            <div>
+                                <p class="font-semibold text-green-800 dark:text-green-200">Aplikasi Siap Offline!</p>
+                                <ul class="text-sm text-green-600 dark:text-green-300 mt-1 space-y-1">
+                                    <li>• Data tersimpan di perangkat Anda</li>
+                                    <li>• Berfungsi tanpa internet</li>
+                                    <li>• Otomatis tersinkronisasi</li>
+                                    <li>• Akses cepat kapan saja</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="offlineInfo" class="text-center">
+                        <p style="color: var(--text-secondary);" class="text-lg">Aplikasi telah dikonfigurasi untuk bekerja offline. Semua fitur akan tetap berfungsi meskipun tidak ada koneksi internet.</p>
+                    </div>
+                </div>
+
+                <!-- Ganti PIN -->
+                <div class="card p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="icon-wrapper bg-gradient-to-br from-orange-500 to-amber-600 text-white">🔐</div>
+                        <h3 class="text-2xl font-bold" style="color: var(--text-primary);">Ganti PIN</h3>
+                    </div>
+                    <p style="color: var(--text-secondary);" class="mb-6 text-lg">Ubah PIN keamanan untuk mengamankan data aplikasi</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <input type="password" id="oldPin" placeholder="PIN Lama" maxlength="4" class="input-field text-center text-2xl tracking-widest">
+                        <input type="password" id="newPinChange" placeholder="PIN Baru" maxlength="4" class="input-field text-center text-2xl tracking-widest">
+                        <input type="password" id="confirmNewPin" placeholder="Konfirmasi PIN Baru" maxlength="4" class="input-field text-center text-2xl tracking-widest">
+                    </div>
+                    <button onclick="changePin()" class="px-8 py-3 rounded-xl font-semibold transition-all duration-200 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5">Ganti PIN</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global Variables
+        let products = JSON.parse(localStorage.getItem('warung_products') || '[]');
+        let transactions = JSON.parse(localStorage.getItem('warung_transactions') || '[]');
+        let currentChart = null;
+        let isDarkMode = localStorage.getItem('warung_darkMode') === 'true';
+        let deferredPrompt = null;
+
+        // Notification System
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = message;
+            
+            // Remove existing classes
+            notification.classList.remove('show', 'error');
+            
+            // Add appropriate class
+            if (type === 'error') {
+                notification.classList.add('error');
+            }
+            
+            // Show notification
+            notification.classList.add('show');
+            
+            // Hide after 2 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // PWA Auto-Setup
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Auto-show install notification
+            showNotification('Aplikasi siap diinstall! Cek menu browser untuk "Add to Home Screen"', 'success');
+        });
+
+        window.addEventListener('appinstalled', (evt) => {
+            showNotification('Aplikasi berhasil diinstall! 🎉', 'success');
+        });
+
+        // Online Status Monitoring
+        function updateOnlineStatus() {
+            const statusIcon = document.getElementById('statusIcon');
+            const statusText = document.getElementById('statusText');
+            
+            if (navigator.onLine) {
+                statusIcon.textContent = '🟢';
+                statusText.textContent = 'Online';
+                statusText.style.color = 'var(--accent)';
+            } else {
+                statusIcon.textContent = '🟡';
+                statusText.textContent = 'Offline';
+                statusText.style.color = 'var(--warning)';
+            }
+        }
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', function() {
+            checkPinSetup();
+            if (isDarkMode) {
+                document.body.classList.add('dark');
+                document.getElementById('darkModeIcon').textContent = '☀️';
+            }
+            initializeApp();
+            initScrollAnimation();
+            updateOnlineStatus();
+            
+            // Listen for online/offline events
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+        });
+
+        // Scroll Animation Control
+        let lastScrollY = 0;
+        function initScrollAnimation() {
+            const scrollingText = document.getElementById('scrollingText');
+            
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                
+                if (currentScrollY > lastScrollY) {
+                    // Scrolling down - move text to right
+                    scrollingText.classList.remove('scroll-direction-up');
+                } else {
+                    // Scrolling up - move text to left
+                    scrollingText.classList.add('scroll-direction-up');
+                }
+                
+                lastScrollY = currentScrollY;
+            });
+        }
+
+        // PIN Management
+        function checkPinSetup() {
+            const pin = localStorage.getItem('warung_pin');
+            if (!pin) {
+                document.getElementById('pinSetupModal').classList.remove('hidden');
+            } else {
+                document.getElementById('pinSetupModal').classList.add('hidden');
+            }
+        }
+
+        function setupPin() {
+            const newPin = document.getElementById('newPin').value;
+            const confirmPin = document.getElementById('confirmPin').value;
+
+            if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+                showNotification('PIN harus 4 digit angka!', 'error');
+                return;
+            }
+
+            if (newPin !== confirmPin) {
+                showNotification('PIN tidak cocok!', 'error');
+                return;
+            }
+
+            localStorage.setItem('warung_pin', newPin);
+            document.getElementById('pinSetupModal').classList.add('hidden');
+            initializeApp();
+        }
+
+        function showVerifyModal() {
+            document.getElementById('pinVerifyModal').classList.remove('hidden');
+        }
+
+        function closeVerifyModal() {
+            document.getElementById('pinVerifyModal').classList.add('hidden');
+            document.getElementById('verifyPin').value = '';
+        }
+
+        let pendingAction = null;
+
+        function verifyPinAndExecute() {
+            const enteredPin = document.getElementById('verifyPin').value;
+            const storedPin = localStorage.getItem('warung_pin');
+
+            if (enteredPin === storedPin) {
+                if (pendingAction) {
+                    pendingAction();
+                    pendingAction = null;
+                }
+            } else {
+                alert('PIN salah!');
+            }
+            closeVerifyModal();
+        }
+
+        function showDeleteAllDataModal() {
+            document.getElementById('pinVerifyMessage').textContent = 'Masukkan PIN untuk menghapus SEMUA data';
+            pendingAction = function() {
+                // Reset all data
+                products = [];
+                transactions = [];
+                localStorage.removeItem('warung_products');
+                localStorage.removeItem('warung_transactions');
+                
+                // Update all displays
+                updateProductList();
+                updateProductSelect();
+                updateTransactionHistory();
+                updateAnalysis();
+                updateRecommendations();
+                
+                showNotification('Semua data berhasil dihapus!', 'success');
+            };
+            document.getElementById('pinVerifyModal').classList.remove('hidden');
+        }
+
+        function showDeleteProductModal(productId, productName) {
+            document.getElementById('pinVerifyMessage').textContent = `Masukkan PIN untuk menghapus produk "${productName}"`;
+            pendingAction = function() {
+                hapusProduk(productId);
+            };
+            document.getElementById('pinVerifyModal').classList.remove('hidden');
+        }
+
+        function showDeleteTransactionModal(transactionId) {
+            document.getElementById('pinVerifyMessage').textContent = 'Masukkan PIN untuk menghapus transaksi ini';
+            pendingAction = function() {
+                hapusTransaksi(transactionId);
+            };
+            document.getElementById('pinVerifyModal').classList.remove('hidden');
+        }
+
+        function changePin() {
+            const oldPin = document.getElementById('oldPin').value;
+            const newPin = document.getElementById('newPinChange').value;
+            const confirmPin = document.getElementById('confirmNewPin').value;
+            const storedPin = localStorage.getItem('warung_pin');
+
+            if (oldPin !== storedPin) {
+                alert('PIN lama salah!');
+                return;
+            }
+
+            if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+                alert('PIN baru harus 4 digit angka!');
+                return;
+            }
+
+            if (newPin !== confirmPin) {
+                alert('Konfirmasi PIN tidak cocok!');
+                return;
+            }
+
+            localStorage.setItem('warung_pin', newPin);
+            alert('PIN berhasil diubah!');
+            document.getElementById('oldPin').value = '';
+            document.getElementById('newPinChange').value = '';
+            document.getElementById('confirmNewPin').value = '';
+        }
+
+        // Dark Mode
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark');
+            document.getElementById('darkModeIcon').textContent = isDarkMode ? '☀️' : '🌙';
+            localStorage.setItem('warung_darkMode', isDarkMode);
+        }
+
+        // Navigation
+        function toggleMenu() {
+            const menu = document.getElementById('menuDropdown');
+            menu.classList.toggle('hidden');
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            document.getElementById(`page-${pageId}`).classList.remove('hidden');
+            document.getElementById('menuDropdown').classList.add('hidden');
+            
+            // Update navigation button styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('px-4', 'py-2', 'rounded-xl', 'font-semibold', 'transition-all', 'duration-200', 'border-2');
+                btn.style.borderColor = 'var(--border)';
+                btn.style.color = 'var(--text-secondary)';
+                btn.style.background = 'var(--surface)';
+            });
+            
+            const activeBtn = document.getElementById(`nav-${pageId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('px-4', 'py-2', 'rounded-xl', 'font-semibold', 'transition-all', 'duration-200', 'border-2');
+                activeBtn.classList.add('btn-primary');
+                activeBtn.style.borderColor = '';
+                activeBtn.style.color = '';
+                activeBtn.style.background = '';
+            }
+            
+            if (pageId === 'analisis') {
+                updateAnalysis();
+                updateChart('daily');
+                updateRecommendations();
+            } else if (pageId === 'produk') {
+                updateProductList();
+            } else if (pageId === 'transaksi') {
+                updateProductSelect();
+                updateTransactionHistory();
+            }
+        }
+
+        // Initialize App
+        function initializeApp() {
+            updateAnalysis();
+            updateProductList();
+            updateProductSelect();
+            updateTransactionHistory();
+            updateChart('daily');
+            updateRecommendations();
+            populateMonthSelect();
+        }
+
+        // Product Management
+        function tambahProduk() {
+            const nama = document.getElementById('namaProduk').value.trim();
+            const hargaBeli = parseFloat(document.getElementById('hargaBeli').value) || 0;
+            const hargaJual = parseFloat(document.getElementById('hargaJual').value) || 0;
+            const stokAwal = parseInt(document.getElementById('stokAwal').value) || 0;
+
+            if (!nama || hargaBeli <= 0 || hargaJual <= 0) {
+                showNotification('Mohon isi semua field dengan benar!', 'error');
+                return;
+            }
+
+            const product = {
+                id: Date.now(),
+                nama,
+                hargaBeli,
+                hargaJual,
+                stok: stokAwal,
+                keuntungan: hargaJual - hargaBeli
+            };
+
+            products.push(product);
+            localStorage.setItem('warung_products', JSON.stringify(products));
+            
+            // Clear form
+            document.getElementById('namaProduk').value = '';
+            document.getElementById('hargaBeli').value = '';
+            document.getElementById('hargaJual').value = '';
+            document.getElementById('stokAwal').value = '';
+            
+            updateProductList();
+            updateProductSelect();
+            showNotification(`${nama} berhasil ditambahkan!`, 'success');
+        }
+
+        function updateProductList() {
+            const tbody = document.getElementById('daftarProduk');
+            tbody.innerHTML = '';
+
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                const isLowStock = product.stok <= 5;
+                
+                if (isLowStock) {
+                    row.classList.add('warning-stock');
+                }
+
+                row.innerHTML = `
+                    <td class="py-4 px-6" style="color: var(--text-primary);">${product.nama}</td>
+                    <td class="py-4 px-6" style="color: var(--text-primary);">Rp ${product.hargaBeli.toLocaleString()}</td>
+                    <td class="py-4 px-6" style="color: var(--text-primary);">Rp ${product.hargaJual.toLocaleString()}</td>
+                    <td class="py-4 px-6 font-semibold" style="color: var(--accent);">Rp ${product.keuntungan.toLocaleString()}</td>
+                    <td class="py-4 px-6">
+                        <div class="flex items-center gap-2">
+                            <input type="number" value="${product.stok}" onchange="updateStock(${product.id}, this.value)" 
+                                   class="w-20 p-2 border-2 rounded-lg transition-all duration-200 ${isLowStock ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : ''}" style="border-color: var(--border); background: var(--surface); color: var(--text-primary);">
+                            ${isLowStock ? '<span class="text-yellow-600 text-xs font-medium">⚠️ Menipis</span>' : ''}
+                        </div>
+                    </td>
+                    <td class="py-4 px-6">
+                        <button onclick="showDeleteProductModal(${product.id}, '${product.nama}')" class="px-4 py-2 rounded-lg font-medium transition-all duration-200 bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400">Hapus</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStock(productId, newStock) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                product.stok = parseInt(newStock) || 0;
+                localStorage.setItem('warung_products', JSON.stringify(products));
+                updateProductList();
+            }
+        }
+
+        function hapusProduk(productId) {
+            const product = products.find(p => p.id === productId);
+            const productName = product ? product.nama : 'Produk';
+            
+            products = products.filter(p => p.id !== productId);
+            localStorage.setItem('warung_products', JSON.stringify(products));
+            updateProductList();
+            updateProductSelect();
+            updateAnalysis();
+            showNotification(`${productName} berhasil dihapus!`, 'success');
+        }
+
+        function hapusTransaksi(transactionId) {
+            const transaction = transactions.find(t => t.id === transactionId);
+            if (transaction && transaction.jenis === 'penjualan') {
+                // Kembalikan stok jika transaksi penjualan
+                const product = products.find(p => p.id === transaction.produkId);
+                if (product) {
+                    product.stok += transaction.jumlah;
+                    localStorage.setItem('warung_products', JSON.stringify(products));
+                }
+            }
+            
+            transactions = transactions.filter(t => t.id !== transactionId);
+            localStorage.setItem('warung_transactions', JSON.stringify(transactions));
+            updateTransactionHistory();
+            updateAnalysis();
+            updateProductList();
+            showNotification('Transaksi berhasil dihapus!', 'success');
+        }
+
+        function updateProductSelect() {
+            const select = document.getElementById('produkPenjualan');
+            select.innerHTML = '<option value="">Pilih Produk</option>';
+            
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = `${product.nama} (Stok: ${product.stok})`;
+                select.appendChild(option);
+            });
+
+            select.addEventListener('change', function() {
+                const productId = parseInt(this.value);
+                const product = products.find(p => p.id === productId);
+                const info = document.getElementById('infoPenjualan');
+                
+                if (product) {
+                    info.innerHTML = `
+                        <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded">
+                            <p><strong>Harga Jual:</strong> Rp ${product.hargaJual.toLocaleString()}</p>
+                            <p><strong>Stok Tersedia:</strong> ${product.stok}</p>
+                            <p><strong>Keuntungan per unit:</strong> Rp ${product.keuntungan.toLocaleString()}</p>
+                        </div>
+                    `;
+                } else {
+                    info.innerHTML = '';
+                }
+            });
+        }
+
+        // Transaction Management
+        function simpanPenjualan() {
+            const productId = parseInt(document.getElementById('produkPenjualan').value);
+            const jumlah = parseInt(document.getElementById('jumlahPenjualan').value) || 0;
+            
+            if (!productId || jumlah <= 0) {
+                showNotification('Mohon pilih produk dan masukkan jumlah yang valid!', 'error');
+                return;
+            }
+
+            const product = products.find(p => p.id === productId);
+            if (!product) {
+                showNotification('Produk tidak ditemukan!', 'error');
+                return;
+            }
+
+            if (jumlah > product.stok) {
+                showNotification(`Stok tidak mencukupi! Stok tersedia: ${product.stok}`, 'error');
+                return;
+            }
+
+            const now = new Date();
+            const transaction = {
+                id: Date.now(),
+                tanggal: now.toISOString(),
+                jam: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                jenis: 'penjualan',
+                produkId: productId,
+                produkNama: product.nama,
+                jumlah: jumlah,
+                hargaJual: product.hargaJual,
+                hargaBeli: product.hargaBeli,
+                totalPendapatan: jumlah * product.hargaJual,
+                totalModal: jumlah * product.hargaBeli,
+                keuntungan: jumlah * product.keuntungan
+            };
+
+            transactions.push(transaction);
+            
+            // Update stock
+            product.stok -= jumlah;
+            
+            localStorage.setItem('warung_transactions', JSON.stringify(transactions));
+            localStorage.setItem('warung_products', JSON.stringify(products));
+            
+            // Clear form
+            document.getElementById('produkPenjualan').value = '';
+            document.getElementById('jumlahPenjualan').value = '';
+            document.getElementById('infoPenjualan').innerHTML = '';
+            
+            updateProductList();
+            updateProductSelect();
+            updateTransactionHistory();
+            updateAnalysis();
+            showNotification(`Penjualan ${product.nama} berhasil dicatat!`, 'success');
+        }
+
+        function simpanPengeluaran() {
+            const keterangan = document.getElementById('keteranganPengeluaran').value.trim();
+            const jumlah = parseFloat(document.getElementById('jumlahPengeluaran').value) || 0;
+            
+            if (!keterangan || jumlah <= 0) {
+                showNotification('Mohon isi keterangan dan jumlah pengeluaran!', 'error');
+                return;
+            }
+
+            const now = new Date();
+            const transaction = {
+                id: Date.now(),
+                tanggal: now.toISOString(),
+                jam: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                jenis: 'pengeluaran',
+                keterangan: keterangan,
+                jumlah: jumlah
+            };
+
+            transactions.push(transaction);
+            localStorage.setItem('warung_transactions', JSON.stringify(transactions));
+            
+            // Clear form
+            document.getElementById('keteranganPengeluaran').value = '';
+            document.getElementById('jumlahPengeluaran').value = '';
+            
+            updateTransactionHistory();
+            updateAnalysis();
+            showNotification(`Pengeluaran ${keterangan} berhasil dicatat!`, 'success');
+        }
+
+        function updateTransactionHistory() {
+            const tbody = document.getElementById('riwayatTransaksi');
+            tbody.innerHTML = '';
+
+            const sortedTransactions = [...transactions].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+            sortedTransactions.slice(0, 50).forEach(transaction => {
+                const row = document.createElement('tr');
+                const tanggal = new Date(transaction.tanggal).toLocaleDateString('id-ID');
+                
+                let keterangan, jumlah, jenisClass;
+                
+                if (transaction.jenis === 'penjualan') {
+                    keterangan = `${transaction.produkNama} (${transaction.jumlah} unit)`;
+                    jumlah = `+Rp ${transaction.totalPendapatan.toLocaleString()}`;
+                    jenisClass = 'text-green-600';
+                } else {
+                    keterangan = transaction.keterangan;
+                    jumlah = `-Rp ${transaction.jumlah.toLocaleString()}`;
+                    jenisClass = 'text-red-600';
+                }
+
+                row.innerHTML = `
+                    <td class="py-4 px-6" style="color: var(--text-primary);">${tanggal}</td>
+                    <td class="py-4 px-6" style="color: var(--text-secondary);">${transaction.jam || '-'}</td>
+                    <td class="py-4 px-6">
+                        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${transaction.jenis === 'penjualan' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'}">
+                            ${transaction.jenis === 'penjualan' ? '📈 Penjualan' : '📉 Pengeluaran'}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6" style="color: var(--text-primary);">${keterangan}</td>
+                    <td class="py-4 px-6 font-semibold ${jenisClass}">${jumlah}</td>
+                    <td class="py-4 px-6">
+                        <button onclick="showDeleteTransactionModal(${transaction.id})" class="px-3 py-1 rounded-lg font-medium transition-all duration-200 bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400 text-sm">Hapus</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Analysis
+        function updateAnalysis() {
+            const penjualanTransactions = transactions.filter(t => t.jenis === 'penjualan');
+            const pengeluaranTransactions = transactions.filter(t => t.jenis === 'pengeluaran');
+
+            const totalPemasukan = penjualanTransactions.reduce((sum, t) => sum + t.totalPendapatan, 0);
+            const totalModal = penjualanTransactions.reduce((sum, t) => sum + t.totalModal, 0);
+            const totalPengeluaran = pengeluaranTransactions.reduce((sum, t) => sum + t.jumlah, 0);
+            const labaKotor = totalPemasukan - totalModal;
+            const labaBersih = labaKotor - totalPengeluaran;
+
+            document.getElementById('totalPemasukan').textContent = `Rp ${totalPemasukan.toLocaleString()}`;
+            document.getElementById('totalPengeluaran').textContent = `Rp ${totalPengeluaran.toLocaleString()}`;
+            document.getElementById('labaKotor').textContent = `Rp ${labaKotor.toLocaleString()}`;
+            document.getElementById('labaBersih').textContent = `Rp ${labaBersih.toLocaleString()}`;
+        }
+
+        // Chart Management
+        function populateMonthSelect() {
+            const select = document.getElementById('monthSelect');
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                          'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const currentYear = new Date().getFullYear();
+            for (let year = currentYear - 1; year <= currentYear + 1; year++) {
+                months.forEach((month, index) => {
+                    const option = document.createElement('option');
+                    option.value = `${year}-${String(index + 1).padStart(2, '0')}`;
+                    option.textContent = `${month} ${year}`;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        function updateChart(period) {
+            // Update button styles
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('px-6', 'py-3', 'rounded-xl', 'font-semibold', 'transition-all', 'duration-200', 'border-2');
+                btn.style.borderColor = 'var(--border)';
+                btn.style.color = 'var(--text-secondary)';
+                btn.style.background = 'var(--surface)';
+            });
+
+            if (period !== 'specific') {
+                const activeBtn = document.getElementById(`btn-${period}`);
+                if (activeBtn) {
+                    activeBtn.classList.remove('px-6', 'py-3', 'rounded-xl', 'font-semibold', 'transition-all', 'duration-200', 'border-2');
+                    activeBtn.classList.add('btn-primary');
+                    activeBtn.style.borderColor = '';
+                    activeBtn.style.color = '';
+                    activeBtn.style.background = '';
+                }
+            }
+
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            let labels = [];
+            let labaBersihData = [];
+            let labaKotorData = [];
+
+            const now = new Date();
+            const penjualanTransactions = transactions.filter(t => t.jenis === 'penjualan');
+            const pengeluaranTransactions = transactions.filter(t => t.jenis === 'pengeluaran');
+
+            if (period === 'daily') {
+                // Last 7 days
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date(now);
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    
+                    labels.push(date.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric' }));
+                    
+                    const dayPenjualan = penjualanTransactions.filter(t => t.tanggal.startsWith(dateStr));
+                    const dayPengeluaran = pengeluaranTransactions.filter(t => t.tanggal.startsWith(dateStr));
+                    
+                    const totalPendapatan = dayPenjualan.reduce((sum, t) => sum + t.totalPendapatan, 0);
+                    const totalModal = dayPenjualan.reduce((sum, t) => sum + t.totalModal, 0);
+                    const totalPengeluaran = dayPengeluaran.reduce((sum, t) => sum + t.jumlah, 0);
+                    
+                    const labaKotor = totalPendapatan - totalModal;
+                    const labaBersih = labaKotor - totalPengeluaran;
+                    
+                    labaKotorData.push(labaKotor);
+                    labaBersihData.push(labaBersih);
+                }
+            } else if (period === 'weekly') {
+                // Last 4 weeks
+                for (let i = 3; i >= 0; i--) {
+                    const endDate = new Date(now);
+                    endDate.setDate(endDate.getDate() - (i * 7));
+                    const startDate = new Date(endDate);
+                    startDate.setDate(startDate.getDate() - 6);
+                    
+                    labels.push(`Minggu ${4-i}`);
+                    
+                    const weekPenjualan = penjualanTransactions.filter(t => {
+                        const tDate = new Date(t.tanggal);
+                        return tDate >= startDate && tDate <= endDate;
+                    });
+                    
+                    const weekPengeluaran = pengeluaranTransactions.filter(t => {
+                        const tDate = new Date(t.tanggal);
+                        return tDate >= startDate && tDate <= endDate;
+                    });
+                    
+                    const totalPendapatan = weekPenjualan.reduce((sum, t) => sum + t.totalPendapatan, 0);
+                    const totalModal = weekPenjualan.reduce((sum, t) => sum + t.totalModal, 0);
+                    const totalPengeluaran = weekPengeluaran.reduce((sum, t) => sum + t.jumlah, 0);
+                    
+                    const labaKotor = totalPendapatan - totalModal;
+                    const labaBersih = labaKotor - totalPengeluaran;
+                    
+                    labaKotorData.push(labaKotor);
+                    labaBersihData.push(labaBersih);
+                }
+            } else if (period === 'monthly') {
+                // Last 6 months
+                for (let i = 5; i >= 0; i--) {
+                    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    
+                    labels.push(date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }));
+                    
+                    const monthPenjualan = penjualanTransactions.filter(t => t.tanggal.startsWith(monthStr));
+                    const monthPengeluaran = pengeluaranTransactions.filter(t => t.tanggal.startsWith(monthStr));
+                    
+                    const totalPendapatan = monthPenjualan.reduce((sum, t) => sum + t.totalPendapatan, 0);
+                    const totalModal = monthPenjualan.reduce((sum, t) => sum + t.totalModal, 0);
+                    const totalPengeluaran = monthPengeluaran.reduce((sum, t) => sum + t.jumlah, 0);
+                    
+                    const labaKotor = totalPendapatan - totalModal;
+                    const labaBersih = labaKotor - totalPengeluaran;
+                    
+                    labaKotorData.push(labaKotor);
+                    labaBersihData.push(labaBersih);
+                }
+            } else if (period === 'specific') {
+                const selectedMonth = document.getElementById('monthSelect').value;
+                if (!selectedMonth) return;
+                
+                const [year, month] = selectedMonth.split('-');
+                const daysInMonth = new Date(year, month, 0).getDate();
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${year}-${month}-${String(day).padStart(2, '0')}`;
+                    labels.push(day.toString());
+                    
+                    const dayPenjualan = penjualanTransactions.filter(t => t.tanggal.startsWith(dateStr));
+                    const dayPengeluaran = pengeluaranTransactions.filter(t => t.tanggal.startsWith(dateStr));
+                    
+                    const totalPendapatan = dayPenjualan.reduce((sum, t) => sum + t.totalPendapatan, 0);
+                    const totalModal = dayPenjualan.reduce((sum, t) => sum + t.totalModal, 0);
+                    const totalPengeluaran = dayPengeluaran.reduce((sum, t) => sum + t.jumlah, 0);
+                    
+                    const labaKotor = totalPendapatan - totalModal;
+                    const labaBersih = labaKotor - totalPengeluaran;
+                    
+                    labaKotorData.push(labaKotor);
+                    labaBersihData.push(labaBersih);
+                }
+            }
+
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Laba Kotor',
+                        data: labaKotorData,
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Laba Bersih',
+                        data: labaBersihData,
+                        borderColor: 'rgb(147, 51, 234)',
+                        backgroundColor: 'rgba(147, 51, 234, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Analisis Keuntungan'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function downloadChart() {
+            if (currentChart) {
+                try {
+                    // Get chart as base64 image
+                    const chartImage = currentChart.toBase64Image('image/png', 1.0);
+                    
+                    // Create filename with timestamp
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    const filename = `analisis-pendapatan-${timestamp}.png`;
+                    
+                    // For web browsers
+                    if (typeof window !== 'undefined' && window.document) {
+                        const link = document.createElement('a');
+                        link.download = filename;
+                        link.href = chartImage;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        showNotification('Grafik berhasil didownload!', 'success');
+                    }
+                    
+                    // For mobile apps (Cordova/PhoneGap)
+                    else if (typeof cordova !== 'undefined' && cordova.file) {
+                        // Convert base64 to blob
+                        const base64Data = chartImage.split(',')[1];
+                        const byteCharacters = atob(base64Data);
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        const blob = new Blob([byteArray], {type: 'image/png'});
+                        
+                        // Save to device storage
+                        window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
+                            dirEntry.getFile(filename, {create: true}, function(fileEntry) {
+                                fileEntry.createWriter(function(fileWriter) {
+                                    fileWriter.write(blob);
+                                    showNotification('Grafik disimpan ke Downloads!', 'success');
+                                });
+                            });
+                        });
+                    }
+                    
+                    // Fallback: show image in new window
+                    else {
+                        const newWindow = window.open();
+                        newWindow.document.write(`<img src="${chartImage}" alt="Chart"/>`);
+                        showNotification('Grafik dibuka di tab baru!', 'success');
+                    }
+                    
+                } catch (error) {
+                    console.error('Error downloading chart:', error);
+                    showNotification('Gagal mendownload grafik!', 'error');
+                }
+            } else {
+                showNotification('Tidak ada grafik untuk didownload!', 'error');
+            }
+        }
+
+        // Recommendations
+        function updateRecommendations() {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            const recentSales = transactions.filter(t => 
+                t.jenis === 'penjualan' && new Date(t.tanggal) >= thirtyDaysAgo
+            );
+
+            // Calculate sales frequency for each product
+            const productSales = {};
+            recentSales.forEach(sale => {
+                if (!productSales[sale.produkId]) {
+                    productSales[sale.produkId] = {
+                        nama: sale.produkNama,
+                        totalSold: 0,
+                        frequency: 0
+                    };
+                }
+                productSales[sale.produkId].totalSold += sale.jumlah;
+                productSales[sale.produkId].frequency += 1;
+            });
+
+            // Sort by total sold
+            const sortedProducts = Object.values(productSales).sort((a, b) => b.totalSold - a.totalSold);
+
+            // High demand products (top 5)
+            const highDemand = sortedProducts.slice(0, 5);
+            const stokUlangDiv = document.getElementById('rekomendasiStokUlang');
+            stokUlangDiv.innerHTML = '';
+            
+            if (highDemand.length > 0) {
+                highDemand.forEach((product, index) => {
+                    const currentProduct = products.find(p => p.nama === product.nama);
+                    const div = document.createElement('div');
+                    div.className = 'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-4 rounded-xl border border-green-200 dark:border-green-700 hover:shadow-lg transition-all duration-300 hover:scale-105';
+                    div.style.animationDelay = `${index * 0.1}s`;
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">${index + 1}</div>
+                            <h5 class="font-bold text-green-800 dark:text-green-200 text-lg">${product.nama}</h5>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">📈 ${product.totalSold} unit terjual</span>
+                            </div>
+                            ${currentProduct ? `<div class="flex items-center gap-2">
+                                <span class="text-xs ${currentProduct.stok <= 5 ? 'bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300' : 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'} px-2 py-1 rounded-full">📦 Stok: ${currentProduct.stok}</span>
+                            </div>` : ''}
+                            <div class="w-full bg-green-200 dark:bg-green-800 rounded-full h-2 mt-2">
+                                <div class="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full transition-all duration-500" style="width: ${Math.min((product.totalSold / Math.max(...highDemand.map(p => p.totalSold))) * 100, 100)}%"></div>
+                            </div>
+                        </div>
+                    `;
+                    stokUlangDiv.appendChild(div);
+                });
+            } else {
+                stokUlangDiv.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl">📊</span>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">Belum ada data penjualan</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500">Mulai catat penjualan untuk melihat rekomendasi</p>
+                    </div>
+                `;
+            }
+
+            // Low demand products (bottom 5, but only if they have sales)
+            const lowDemand = sortedProducts.slice(-5).reverse();
+            const kurangiDiv = document.getElementById('rekomendasiKurangi');
+            kurangiDiv.innerHTML = '';
+            
+            if (lowDemand.length > 0 && sortedProducts.length > 5) {
+                lowDemand.forEach((product, index) => {
+                    const currentProduct = products.find(p => p.nama === product.nama);
+                    const div = document.createElement('div');
+                    div.className = 'bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm p-4 rounded-xl border border-orange-200 dark:border-orange-700 hover:shadow-lg transition-all duration-300 hover:scale-105';
+                    div.style.animationDelay = `${index * 0.1}s`;
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">⚠️</div>
+                            <h5 class="font-bold text-orange-800 dark:text-orange-200 text-lg">${product.nama}</h5>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 px-2 py-1 rounded-full">📉 ${product.totalSold} unit terjual</span>
+                            </div>
+                            ${currentProduct ? `<div class="flex items-center gap-2">
+                                <span class="text-xs bg-gray-100 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">📦 Stok: ${currentProduct.stok}</span>
+                            </div>` : ''}
+                            <div class="w-full bg-orange-200 dark:bg-orange-800 rounded-full h-2 mt-2">
+                                <div class="bg-gradient-to-r from-orange-500 to-red-600 h-2 rounded-full transition-all duration-500" style="width: ${Math.min((product.totalSold / Math.max(...sortedProducts.map(p => p.totalSold))) * 100, 100)}%"></div>
+                            </div>
+                        </div>
+                    `;
+                    kurangiDiv.appendChild(div);
+                });
+            } else {
+                kurangiDiv.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl">✅</span>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">Semua produk terjual baik</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500">Tidak ada produk yang perlu dikurangi</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Export Data
+        function exportData() {
+            try {
+                // Create CSV header with jam column
+                let csv = 'Tanggal,Jam,Jenis,Keterangan,Jumlah,Keuntungan\n';
+                
+                transactions.forEach(transaction => {
+                    const tanggal = new Date(transaction.tanggal).toLocaleDateString('id-ID');
+                    const jam = transaction.jam || '-';
+                    let keterangan, jumlah, keuntungan;
+                    
+                    if (transaction.jenis === 'penjualan') {
+                        keterangan = `${transaction.produkNama} (${transaction.jumlah} unit)`;
+                        jumlah = transaction.totalPendapatan;
+                        keuntungan = transaction.keuntungan;
+                    } else {
+                        keterangan = transaction.keterangan;
+                        jumlah = -transaction.jumlah;
+                        keuntungan = 0;
+                    }
+                    
+                    // Escape commas in text fields
+                    keterangan = keterangan.replace(/,/g, ';');
+                    csv += `${tanggal},${jam},${transaction.jenis},${keterangan},${jumlah},${keuntungan}\n`;
+                });
+
+                // Create filename with timestamp
+                const timestamp = new Date().toISOString().slice(0, 10);
+                const filename = `warung-data-${timestamp}.csv`;
+
+                // For web browsers
+                if (typeof window !== 'undefined' && window.document) {
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    showNotification('Data CSV berhasil didownload!', 'success');
+                }
+                
+                // For mobile apps (Cordova/PhoneGap)
+                else if (typeof cordova !== 'undefined' && cordova.file) {
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    
+                    window.resolveLocalFileSystemURL(cordova.file.externalRootDirectory, function(dirEntry) {
+                        dirEntry.getFile(filename, {create: true}, function(fileEntry) {
+                            fileEntry.createWriter(function(fileWriter) {
+                                fileWriter.write(blob);
+                                showNotification('Data CSV disimpan ke Downloads!', 'success');
+                            });
+                        });
+                    }, function(error) {
+                        console.error('Error accessing file system:', error);
+                        showNotification('Gagal menyimpan file CSV!', 'error');
+                    });
+                }
+                
+                // Fallback: show CSV content in new window
+                else {
+                    const newWindow = window.open();
+                    newWindow.document.write(`<pre>${csv}</pre>`);
+                    showNotification('Data CSV dibuka di tab baru!', 'success');
+                }
+                
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                showNotification('Gagal mengexport data!', 'error');
+            }
+        }
+
+        // Auto-Cache Resources for Offline Use
+        function cacheResources() {
+            if ('caches' in window) {
+                caches.open('warung-manager-v1').then(cache => {
+                    cache.addAll([
+                        'https://cdn.tailwindcss.com',
+                        'https://cdn.jsdelivr.net/npm/chart.js'
+                    ]).then(() => {
+                        console.log('Resources cached for offline use');
+                    }).catch(err => {
+                        console.log('Caching failed:', err);
+                    });
+                });
+            }
+        }
+
+        // Call caching on load
+        window.addEventListener('load', cacheResources);
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('menuDropdown');
+            const menuButton = event.target.closest('[onclick="toggleMenu()"]');
+            
+            if (!menuButton && !menu.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        // Initialize with analysis page
+        showPage('analisis');
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97ac02cc75409fe5',t:'MTc1NzE0MTIwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
